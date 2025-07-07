@@ -6,6 +6,7 @@ import java.util.UUID;
 import com.book.club.demo.controllers.dtos.mapper.BookMapper;
 import com.book.club.demo.controllers.dtos.mapper.RecommendationMapper;
 import com.book.club.demo.controllers.dtos.request.BookRequestDTO;
+import com.book.club.demo.controllers.dtos.request.RecommendationRequestDTO;
 import org.springframework.stereotype.Service;
 
 import com.book.club.demo.exceptions.ConflictException;
@@ -37,23 +38,23 @@ public class RecommendationService {
     }
 
     @Transactional
-    public BookResponseDTO saveBookRecommendation(BookRequestDTO bookDto, Integer readingNumber) {
+    public BookResponseDTO saveBookRecommendation(RecommendationRequestDTO recommendationDTO) {
 
-        bookRepository.findByTitle(bookDto.title()).ifPresent(book -> {
+        bookRepository.findByTitle(recommendationDTO.book().title()).ifPresent(book -> {
             throw new ConflictException("Book already exists.");
         });
 
         Book book = Book.builder()
-                .title(bookDto.title())
-                .author(bookDto.author())
+                .title(recommendationDTO.book().title())
+                .author(recommendationDTO.book().author())
                 .build();
 
         bookRepository.save(book);
 
-        Reading reading = readingRepository.findByReadingNumber(readingNumber);
+        Reading reading = readingRepository.findByReadingNumber(recommendationDTO.readingNumber());
         
         if(reading == null) {
-            throw new ResourceNotFoundException("Reading with number " + readingNumber + " does not exist.");
+            throw new ResourceNotFoundException("Reading with number " + recommendationDTO.readingNumber() + " does not exist.");
         }
 
         Recommendation recommendation = Recommendation.builder()

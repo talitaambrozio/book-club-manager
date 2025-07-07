@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.book.club.demo.controllers.dtos.request.BookRequestDTO;
+import com.book.club.demo.controllers.dtos.request.RecommendationRequestDTO;
 import com.book.club.demo.controllers.dtos.response.BookResponseDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,8 +31,8 @@ public class RecommendationController {
     }
 
     @PostMapping("")
-    public ResponseEntity<BookResponseDTO> saveBookRecommendation(@RequestBody BookRequestDTO bookRequestDTO, Integer readingNumber) {
-        BookResponseDTO response = recommendationService.saveBookRecommendation(bookRequestDTO, readingNumber);
+    public ResponseEntity<BookResponseDTO> saveBookRecommendation(@RequestBody RecommendationRequestDTO recommendationDTO) {
+        BookResponseDTO response = recommendationService.saveBookRecommendation(recommendationDTO);
 
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{recommendationId}")

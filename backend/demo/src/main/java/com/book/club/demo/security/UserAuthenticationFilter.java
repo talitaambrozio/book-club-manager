@@ -53,7 +53,20 @@ public class UserAuthenticationFilter extends OncePerRequestFilter{
 
     private boolean checkPublicEndpoints(HttpServletRequest request) {
         String requestURI = request.getRequestURI();
-        return !Arrays.asList("/api/v1/login", "/api/v1/users").contains(requestURI);
+        String method = request.getMethod();
+       // return !Arrays.asList("/api/v1/login", "/api/v1/users").contains(requestURI);
+        // Allow all endpoints under "/api/v1/login" to be public
+        if (requestURI.startsWith("/api/v1/login")) {
+            return false;
+        }
+
+        // Allow only POST requests to "/api/v1/users" to be public
+        if (requestURI.equals("/api/v1/users") && method.equals("POST")) {
+            return false;
+        }
+
+        // All other endpoints require authentication
+        return true;
     }
 
     private String retrieveToken(HttpServletRequest request) {

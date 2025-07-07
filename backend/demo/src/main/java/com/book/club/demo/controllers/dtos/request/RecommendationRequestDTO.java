@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record RecommendationRequestDTO(
     @NotEmpty(message = "Recommendation must not be empty")
-    BookResponseDTO book,
+    BookRequestDTO book,
     @NotNull(message = "Reading number must not be null")
     Integer readingNumber) {
 

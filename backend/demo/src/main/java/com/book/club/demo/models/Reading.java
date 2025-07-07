@@ -23,6 +23,7 @@ public class Reading implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private UUID readingId;
     @OneToOne
+    @JoinColumn(name = "book_id")
     private Book book;
     @OneToMany(mappedBy = "reading", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Recommendation> recommendations;
