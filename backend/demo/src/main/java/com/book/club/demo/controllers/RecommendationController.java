@@ -1,16 +1,22 @@
 package com.book.club.demo.controllers;
 
+import java.net.URI;
+import java.util.List;
+import java.util.UUID;
+
+import com.book.club.demo.controllers.dtos.request.BookRequestDTO;
+import com.book.club.demo.controllers.dtos.response.BookResponseDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.book.club.demo.controllers.dtos.RecommendationDTO;
-import com.book.club.demo.models.dtos.BookDTO;
+
+import com.book.club.demo.controllers.dtos.response.RecommendationResponseDTO;
 import com.book.club.demo.services.RecommendationService;
+
+import jakarta.websocket.server.PathParam;
+
 
 @RestController
 @CrossOrigin("http://localhost:4200")
@@ -24,8 +30,26 @@ public class RecommendationController {
     }
 
     @PostMapping("")
-    public ResponseEntity<String> saveBookRecommendation(@RequestBody RecommendationDTO recommendationDTO) {
-        return new ResponseEntity<>(recommendationService.saveBookRecommendation(recommendationDTO.book(), recommendationDTO.readingNumber()), HttpStatus.CREATED);
+    public ResponseEntity<BookResponseDTO> saveBookRecommendation(@RequestBody BookRequestDTO bookRequestDTO, Integer readingNumber) {
+        BookResponseDTO response = recommendationService.saveBookRecommendation(bookRequestDTO, readingNumber);
+
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{recommendationId}")
+                .buildAndExpand(response.bookId())
+                .toUri();
+        return ResponseEntity.created(uri).body(response);
     }
+
+    @GetMapping("{recommendationId}")
+    public ResponseEntity<RecommendationResponseDTO> getRecommendationById(@PathVariable("recommendationId") UUID recommendationId) {
+        return new ResponseEntity<>(recommendationService.getRecommendationById(recommendationId), HttpStatus.OK);
+    }
+
+    @GetMapping("")
+    public ResponseEntity<List<RecommendationResponseDTO>> getAllRecommendations() {
+        return new ResponseEntity<>(recommendationService.getAllRecommendations(), HttpStatus.OK);
+    }
+    
+    
 
 }

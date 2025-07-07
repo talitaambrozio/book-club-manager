@@ -1,23 +1,20 @@
 package com.book.club.demo.services;
 
 
+import com.book.club.demo.controllers.dtos.mapper.UserMapper;
+import com.book.club.demo.controllers.dtos.request.UserRequestDTO;
 import jakarta.transaction.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import com.book.club.demo.enums.Role;
 import com.book.club.demo.models.ModelRole;
-import com.book.club.demo.models.ModelUserDetailsImpl;
 import com.book.club.demo.models.User;
-import com.book.club.demo.models.dtos.UserDTO;
-import com.book.club.demo.models.dtos.security.JwtTokenDTO;
-import com.book.club.demo.models.dtos.security.LoginUserDTO;
+import com.book.club.demo.controllers.dtos.response.UserResponseDTO;
 import com.book.club.demo.repositories.ModelRoleRepository;
 import com.book.club.demo.repositories.UserRepository;
 import com.book.club.demo.security.SecurityConfig;
@@ -32,18 +29,11 @@ public class UserService {
     private  UserRepository userRepository;
     @Autowired
     private SecurityConfig securityConfig;
-
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private JwtTokenService jwtTokenService;
-
     @Autowired
     private ModelRoleRepository modelRoleRepository;
 
     @Transactional
-    public String saveUser(UserDTO userDTO){
+    public UserResponseDTO saveUser(UserRequestDTO userDTO){
 
         boolean userAlreadyRegistered = userRepository
             .findByUsername(userDTO.username()).isPresent();
@@ -60,37 +50,44 @@ public class UserService {
 
         userRepository.save(newUser);
 
-        return "User registered successfully.";
+        return UserMapper.INSTANCE.userToDTO(newUser);
     }
 
     @Transactional
-    public String updatePassword(UserDTO userDTO){
+    public String updatePassword(UUID userId, UserRequestDTO userRequestDTO){
 
         User user = userRepository
-            .findByUsername(userDTO.username()).get();
+            .findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found."));
 
-        if(user == null){
-            throw new ResourceNotFoundException("User not found.");
-        }
-
-        if(!user.getPassword().equals(userDTO.password())){
+        if(!user.getPassword().equals(userRequestDTO.password())){
             throw new BadRequestException("Invalid username or password.");
         }
   
-        user.setPassword(securityConfig.passwordEncoder().encode(userDTO.password()));
+        user.setPassword(securityConfig.passwordEncoder().encode(userRequestDTO.password()));
 
         userRepository.save(user);
 
         return "Password updated successfully.";
     }
 
-    public JwtTokenDTO authenticateUser(LoginUserDTO loginUserDto) {
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(loginUserDto.username(), loginUserDto.password());
-
-        Authentication authentication = authenticationManager.authenticate(authenticationToken);
-        ModelUserDetailsImpl userDetails = (ModelUserDetailsImpl) authentication.getPrincipal();
-        return new JwtTokenDTO(jwtTokenService.generateToken(userDetails));
+    public List<UserResponseDTO> findAllUsers() {
+        List<User> users = userRepository.findAll();
+        return UserMapper.INSTANCE.usersToDTOs(users);
     }
 
+    public UserResponseDTO findUserById(UUID userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found."));
+
+        return UserMapper.INSTANCE.userToDTO(user);
+    }
+
+    @Transactional
+    public String deleteUser(UUID userID){
+        User user = userRepository.findById(userID)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found."));
+
+        userRepository.delete(user);
+        return "User deleted successfully.";
+    }
 }

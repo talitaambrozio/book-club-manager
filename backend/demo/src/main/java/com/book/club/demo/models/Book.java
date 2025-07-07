@@ -17,7 +17,7 @@ import java.util.UUID;
 public class Book implements Serializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private UUID bookId;
     private String title;
     private String author;

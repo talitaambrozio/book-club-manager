@@ -27,9 +27,10 @@ CREATE TABLE "readings" (
 
 -- Recommendations table
 CREATE TABLE "recommendations" (
+    "recommendation_id" UUID DEFAULT gen_random_uuid(),
     "book_id" UUID NOT NULL,
     "reading_id" UUID NOT NULL,
-    PRIMARY KEY ("book_id", "reading_id"),
+    CONSTRAINT pk_recommendations PRIMARY KEY ("book_id", "reading_id"),
     CONSTRAINT fk_recommendations_book FOREIGN KEY ("book_id") REFERENCES "books" ("book_id") ON DELETE CASCADE,
     CONSTRAINT fk_recommendations_reading FOREIGN KEY ("reading_id") REFERENCES "readings" ("reading_id") ON DELETE CASCADE
 );

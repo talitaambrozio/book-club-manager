@@ -8,7 +8,6 @@ import com.book.club.demo.models.ModelRole;
 
 import java.util.UUID;
 
-@Repository
 public interface ModelRoleRepository extends JpaRepository<ModelRole, UUID> {
 
     ModelRole findByName(Role name);

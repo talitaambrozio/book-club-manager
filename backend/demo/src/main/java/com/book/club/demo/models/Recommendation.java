@@ -20,16 +20,13 @@ import java.util.UUID;
 @Table(name = "recommendations")
 public class Recommendation {
 
-    @EmbeddedId
-    private RecommendationId id;
-
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private UUID recommendationId;
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("bookId")
     @JoinColumn(name = "book_id")
     private Book book;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("readingId")
     @JoinColumn(name = "reading_id")
     private Reading reading;
 

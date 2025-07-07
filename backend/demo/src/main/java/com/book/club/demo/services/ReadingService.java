@@ -2,15 +2,19 @@ package com.book.club.demo.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
+import com.book.club.demo.controllers.dtos.mapper.BookMapper;
+import com.book.club.demo.controllers.dtos.mapper.ReadingMapper;
+import com.book.club.demo.controllers.dtos.request.ReadingRequestDTO;
+import com.book.club.demo.controllers.dtos.response.ReadingResponseDTO;
 import org.springframework.stereotype.Service;
 
 import com.book.club.demo.exceptions.BadRequestException;
 import com.book.club.demo.models.Book;
 import com.book.club.demo.models.Reading;
 import com.book.club.demo.models.Recommendation;
-import com.book.club.demo.models.dtos.BookDTO;
-import com.book.club.demo.models.dtos.ReadingDTO;
+import com.book.club.demo.controllers.dtos.response.BookResponseDTO;
 import com.book.club.demo.repositories.ReadingRepository;
 import com.book.club.demo.repositories.RecommendationRepository;
 
@@ -34,7 +38,7 @@ public class ReadingService {
     }
 
     @Transactional
-    public String saveReading(ReadingDTO readingDTO) {
+    public ReadingResponseDTO saveReading(ReadingRequestDTO readingDTO) {
 
         boolean isReadingExists = readingRepository.findByReadingNumber(readingDTO.readingNumber()) != null;
         if(isReadingExists) {
@@ -46,11 +50,12 @@ public class ReadingService {
                 .endDate(readingDTO.endDate())
                 .build();
         readingRepository.save(newReading);
-        return "Reading saved successfully.";
+
+        return ReadingMapper.INSTANCE.readingToReadingResponseDTO(newReading);
     }
 
     @Transactional
-    public Book drawBook(Integer readingNumber) {
+    public BookResponseDTO drawBook(Integer readingNumber) {
         Reading currentReading = readingRepository.findByReadingNumber(readingNumber);
 
         if (currentReading == null) {
@@ -91,18 +96,19 @@ public class ReadingService {
         currentReading.setBook(selectedBook);
         readingRepository.save(currentReading);
 
-        return selectedBook;
+        return BookMapper.INSTANCE.bookToDTO(selectedBook);
     }
 
     @Transactional
-    public List<ReadingDTO> getAllReadings() {
+    public List<ReadingResponseDTO> getAllReadings() {
         List<Reading> readings = readingRepository.findAll();
-        List<ReadingDTO> readingDTOs = readings.stream()
-                .map(reading -> new ReadingDTO(new BookDTO(reading.getBook().getTitle(), reading.getBook().getAuthor()),
-                    reading.getReadingNumber(),
-                        reading.getStartDate(), 
-                        reading.getEndDate()))
-                .toList();
-        return readingDTOs;
+        return ReadingMapper.INSTANCE.readingListToReadingResponseDTOList(readings);
+    }
+
+    public ReadingResponseDTO getReadingById(UUID readingId){
+        Reading reading = readingRepository.findById(readingId)
+                .orElseThrow(() -> new BadRequestException("Reading with ID " + readingId + " does not exist."));
+
+        return ReadingMapper.INSTANCE.readingToReadingResponseDTO(reading);
     }
 }

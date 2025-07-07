@@ -1,15 +1,14 @@
-package com.book.club.demo.controllers.dtos;
+package com.book.club.demo.controllers.dtos.request;
 
-import com.book.club.demo.models.dtos.BookDTO;
-
+import com.book.club.demo.controllers.dtos.response.BookResponseDTO;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-public record RecommendationDTO(
+
+public record RecommendationRequestDTO(
     @NotEmpty(message = "Recommendation must not be empty")
-    BookDTO book,
+    BookResponseDTO book,
     @NotNull(message = "Reading number must not be null")
     Integer readingNumber) {
-
 
 }

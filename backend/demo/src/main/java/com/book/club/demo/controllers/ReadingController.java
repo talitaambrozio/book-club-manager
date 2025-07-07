@@ -1,7 +1,12 @@
 package com.book.club.demo.controllers;
 
+import java.net.URI;
 import java.util.List;
+import java.util.UUID;
 
+import com.book.club.demo.controllers.dtos.request.ReadingRequestDTO;
+import com.book.club.demo.controllers.dtos.response.BookResponseDTO;
+import com.book.club.demo.controllers.dtos.response.ReadingResponseDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -10,14 +15,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.book.club.demo.models.Book;
-import com.book.club.demo.models.Reading;
-import com.book.club.demo.models.dtos.ReadingDTO;
 import com.book.club.demo.services.ReadingService;
 
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 
 @RestController
@@ -32,22 +34,33 @@ public class ReadingController {
     }
 
     @PostMapping("/{readingNumber}")
-    public ResponseEntity<Book> drawBook(@PathVariable("readingNumber") Integer readingNumber) {
+    public ResponseEntity<BookResponseDTO> drawBook(@PathVariable("readingNumber") Integer readingNumber) {
 
-        Book book = readingService.drawBook(readingNumber);
+        BookResponseDTO book = readingService.drawBook(readingNumber);
         return new ResponseEntity<>(book, HttpStatus.OK);
     }
 
 
     @PostMapping("")
-        public ResponseEntity<String> saveReading(@RequestBody ReadingDTO readingDTO) {
+        public ResponseEntity<ReadingResponseDTO> saveReading(@RequestBody ReadingRequestDTO readingDTO) {
 
-        return new ResponseEntity<>(readingService.saveReading(readingDTO), HttpStatus.CREATED);
+        ReadingResponseDTO response = readingService.saveReading(readingDTO);
+
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{readingId}")
+                .buildAndExpand(response.readingId())
+                .toUri();
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @GetMapping("")
-    public ResponseEntity<List<ReadingDTO>> getAllReadings() {
+    public ResponseEntity<List<ReadingResponseDTO>> getAllReadings() {
         return new ResponseEntity<>(readingService.getAllReadings(), HttpStatus.OK);
+    }
+
+    @GetMapping("{readingId}")
+    public ResponseEntity<ReadingResponseDTO> getReadingById(@PathVariable("readingId") UUID readingId) {
+        return new ResponseEntity<>(readingService.getReadingById(readingId), HttpStatus.OK);
     }
     
 }

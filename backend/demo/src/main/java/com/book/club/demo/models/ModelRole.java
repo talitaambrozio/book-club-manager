@@ -20,7 +20,7 @@ import com.book.club.demo.enums.Role;
 public class ModelRole {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private UUID roleId;
 
     @Enumerated(EnumType.STRING)
